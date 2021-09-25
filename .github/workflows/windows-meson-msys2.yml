@@ -87,7 +87,7 @@ jobs:
 
 
           # The list of required dll files and their source paths can be found using ntldd
-          for lib in $(ntldd -R dest/dosbox.exe | sed -e 's/^[[:blank:]]*//g' | cut -d ' ' -f 3 | grep -i 'mingw(32|64)' | sed -e 's|\\|/|g'); do 
+          for lib in $(ntldd -R dest/dosbox.exe | sed -e 's/^[[:blank:]]*//g' | cut -d ' ' -f 3 | grep -E -i 'mingw(32|64)' | sed -e 's|\\|/|g'); do 
             cp "$lib" dest/
           done
 
