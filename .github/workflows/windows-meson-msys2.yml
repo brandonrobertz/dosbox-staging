@@ -34,6 +34,7 @@ jobs:
           msystem: ${{matrix.conf.sys}}
           update: true
           install: >-
+            git
             mingw-w64-${{matrix.conf.arch}}-meson
             mingw-w64-${{matrix.conf.arch}}-gcc
             mingw-w64-${{matrix.conf.arch}}-ccache
