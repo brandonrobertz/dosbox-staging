@@ -41,7 +41,6 @@ jobs:
             mingw-w64-${{matrix.conf.arch}}-pkgconf
             mingw-w64-${{matrix.conf.arch}}-ntldd
             mingw-w64-${{matrix.conf.arch}}-ncurses
-            mingw-w64-${{matrix.conf.arch}}-fluidsynth
             mingw-w64-${{matrix.conf.arch}}-munt-mt32emu
             mingw-w64-${{matrix.conf.arch}}-libpng
             mingw-w64-${{matrix.conf.arch}}-opusfile
@@ -66,13 +65,16 @@ jobs:
             -Ddefault_library=static \
             -Db_asneeded=true \
             -Db_lto=true \
-            -Dtry_static_libs=png \
+            -Dtry_static_libs=png,fluidsynth,opusfile \
             -Dfluidsynth:enable-floats=true \
             -Dfluidsynth:try-static-deps=true \
             build
       
       - name: Build
         run: ninja -C build
+
+      - name: Strip binary
+        run: strip build/dosbox.exe
       
       - name: Package
         run: |
