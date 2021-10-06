@@ -41,6 +41,7 @@ jobs:
             mingw-w64-${{matrix.conf.arch}}-pkgconf
             mingw-w64-${{matrix.conf.arch}}-ntldd
             mingw-w64-${{matrix.conf.arch}}-ncurses
+            mingw-w64-${{matrix.conf.arch}}-glib2
             mingw-w64-${{matrix.conf.arch}}-munt-mt32emu
             mingw-w64-${{matrix.conf.arch}}-libpng
             mingw-w64-${{matrix.conf.arch}}-opusfile
