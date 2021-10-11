@@ -17,8 +17,71 @@
  */
 
 #include "drives.h"
-
 #include "string_utils.h"
+
+#include <cctype>
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <vector>
+
+
+const std::string_view get_extension(const std::string& name) {
+    auto pos = name.find_last_of('.');
+    if (pos == std::string::npos) {
+        return std::string_view{""};
+    }
+    return std::string_view{ &name.at(pos)+1 };
+}
+
+const std::string_view get_filename(const std::string& name) {
+    const std::string_view name_v{name};
+    auto pos = name_v.find_last_of('.');
+    if (pos == std::string::npos) {
+        return name_v;
+    }
+    return name_v.substr(0, pos);
+}
+
+/**
+ * Compare a string with another string that optionally contains
+ * wildcard characters asterisk and question mark.
+ */
+bool wild_equals(const std::string_view &name, const std::string_view &wild) {
+    // both blank, match
+    if (name.empty() && wild.empty()) return true;
+    // iterate on a character-by-character basis so we can only
+    // pass over the strings once. otherwise we can use std::compare or
+    // regexes if we don't care about performance here
+    for (std::string::size_type i = 0; i < wild.size(); i++) {
+        // break here and continue with check if we have a wildcard
+        if (wild[i] == '*') return true;
+        // single char wildcard, don't bother comparing
+        if (wild[i] == '?') continue;
+        // we have non-wildcard, compare
+        if (toupper(wild[i]) != toupper(name[i])) return false;
+        // make sure we don't try to compare past name length
+        if (i == name.size()) break;
+    }
+    // if we're here, we don't have wildcards and we've passed all
+    // matches up to wild length. final check makes sure that
+    // the two strings are of equal length
+    return name.size() == wild.size();
+}
+
+bool WildFileCmp(const std::string &file, const std::string &wild)
+{
+    const auto wild_ext = get_filename(wild);
+    const auto file_ext = get_filename(file);
+
+    const auto wild_name = get_extension(wild);
+    const auto file_name = get_extension(file);
+    
+    if (!wild_equals(file_name, wild_name)) return false;
+    if (!wild_equals(file_ext, wild_ext)) return false;
+
+    return true;
+}
 
 bool WildFileCmp(const char *file, const char *wild)
 {
@@ -27,6 +90,7 @@ bool WildFileCmp(const char *file, const char *wild)
 	char wild_name[9];
 	char wild_ext[4];
 	const char * find_ext;
+    // a generic pointer used for comparison
 	Bitu r;
 
 	strcpy(file_name,"        ");
@@ -34,17 +98,26 @@ bool WildFileCmp(const char *file, const char *wild)
 	strcpy(wild_name,"        ");
 	strcpy(wild_ext,"   ");
 
+    // find position of the dot in the filename
 	find_ext=strrchr(file,'.');
 	if (find_ext) {
+        // compute length of filename w/o extension, max 8
 		Bitu size=(Bitu)(find_ext-file);
 		if (size>8) size=8;
+        // copy the filename w/o extension
 		memcpy(file_name,file,size);
+        // skip the dot
 		find_ext++;
+        // copy the extension
 		memcpy(file_ext, find_ext, strnlen(find_ext, 3));
 	} else {
+        // no extension, copy up to 8 chars as filename
 		memcpy(file_name, file, strnlen(file, 8));
 	}
+    // all filenames are uppercase
 	upcase(file_name);upcase(file_ext);
+
+    // Duplicated code from above but on the search pattern
 	find_ext=strrchr(wild,'.');
 	if (find_ext) {
 		Bitu size=(Bitu)(find_ext-wild);
@@ -56,6 +129,7 @@ bool WildFileCmp(const char *file, const char *wild)
 		memcpy(wild_name, wild, strnlen(wild, 8));
 	}
 	upcase(wild_name);upcase(wild_ext);
+
 	/* Names are right do some checking */
 	r=0;
 	while (r<8) {
