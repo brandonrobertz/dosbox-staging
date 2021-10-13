@@ -47,26 +47,15 @@ namespace {
 
 TEST(get_extension, BasicFunctionality)
 {
-    const std::string_view ext1= get_extension("TEST.EXE");
-    EXPECT_EQ("EXE", ext1);
-
-    const std::string_view ext2 = get_extension("TEST");
-    EXPECT_EQ(true, ext2.empty());
-
-    const std::string_view ext3 = get_extension(".EXE");
-    EXPECT_EQ("EXE", ext3);
+    EXPECT_EQ("EXE", get_extension("TEST.EXE"));
+    EXPECT_EQ(true, get_extension("TEST").empty());
+    EXPECT_EQ("EXE", get_extension(".EXE"));
 }
-
 TEST(get_filename, BasicFunctionality)
 {
-    const std::string_view ext1 = get_filename("TEST.EXE");
-    EXPECT_EQ("TEST", ext1);
-
-    const std::string_view ext2 = get_filename("TEST");
-    EXPECT_EQ("TEST", ext2);
-
-    const std::string_view ext3 = get_filename(".EXE");
-    EXPECT_EQ(true, ext3.empty());
+    EXPECT_EQ("TEST", get_filename("TEST.EXE"));
+    EXPECT_EQ("TEST", get_filename("TEST"));
+    EXPECT_EQ(true, get_filename(".EXE").empty());
 }
 
 TEST(WildFileCmp, ExactMatch)
@@ -76,7 +65,6 @@ TEST(WildFileCmp, ExactMatch)
     EXPECT_EQ(false, WildFileCmp("TEST.EXE", ".EXE"));
     EXPECT_EQ(true, WildFileCmp(".EXE", ".EXE"));
 }
-
 TEST(WildFileCmpSTD, ExactMatch)
 {
     EXPECT_EQ(true, WildFileCmp(std::string("TEST.EXE"), std::string("TEST.EXE")));
@@ -91,6 +79,12 @@ TEST(WildFileCmp, WildDotWild)
     EXPECT_EQ(true, WildFileCmp("TEST", "*.*"));
     EXPECT_EQ(true, WildFileCmp(".EXE", "*.*"));
 }
+TEST(WildFileCmpSTD, WildDotWild)
+{
+    EXPECT_EQ(true, WildFileCmp(std::string("TEST.EXE"), std::string("*.*")));
+    EXPECT_EQ(true, WildFileCmp(std::string("TEST"), std::string("*.*")));
+    EXPECT_EQ(true, WildFileCmp(std::string(".EXE"), std::string("*.*")));
+}
 
 TEST(WildFileCmp, WildcardNoExt)
 {
@@ -100,18 +94,34 @@ TEST(WildFileCmp, WildcardNoExt)
     EXPECT_EQ(true, WildFileCmp("TEST", "T*"));
     EXPECT_EQ(false, WildFileCmp("TEST", "Z*"));
 }
+TEST(WildFileCmpSTD, WildcardNoExt)
+{
+    EXPECT_EQ(false, WildFileCmp(std::string("TEST.EXE"), std::string("*")));
+    EXPECT_EQ(false, WildFileCmp(std::string(".EXE"), std::string("*")));
+    EXPECT_EQ(true, WildFileCmp(std::string("TEST"), std::string("*")));
+    EXPECT_EQ(true, WildFileCmp(std::string("TEST"), std::string("T*")));
+    EXPECT_EQ(false, WildFileCmp(std::string("TEST"), std::string("Z*")));
+}
 
 TEST(WildFileCmp, QuestionMark)
 {
     EXPECT_EQ(true, WildFileCmp("TEST.EXE", "?EST.EXE"));
     EXPECT_EQ(true, WildFileCmp("TEST", "?EST"));
     EXPECT_EQ(false, WildFileCmp("TEST", "???Z"));
-
     EXPECT_EQ(true, WildFileCmp("TEST.EXE", "TEST.???"));
     EXPECT_EQ(true, WildFileCmp("TEST.EXE", "TEST.?XE"));
     EXPECT_EQ(true, WildFileCmp("TEST.EXE", "???T.EXE"));
-
     EXPECT_EQ(true, WildFileCmp("TEST", "???T.???"));
+}
+TEST(WildFileCmpSTD, QuestionMark)
+{
+    EXPECT_EQ(true, WildFileCmp(std::string("TEST.EXE"), std::string("?EST.EXE")));
+    EXPECT_EQ(true, WildFileCmp(std::string("TEST"), std::string("?EST")));
+    EXPECT_EQ(false, WildFileCmp(std::string("TEST"), std::string("???Z")));
+    EXPECT_EQ(true, WildFileCmp(std::string("TEST.EXE"), std::string("TEST.???")));
+    EXPECT_EQ(true, WildFileCmp(std::string("TEST.EXE"), std::string("TEST.?XE")));
+    EXPECT_EQ(true, WildFileCmp(std::string("TEST.EXE"), std::string("???T.EXE")));
+    EXPECT_EQ(true, WildFileCmp(std::string("TEST"), std::string("???T.???")));
 }
 
 } // namespace

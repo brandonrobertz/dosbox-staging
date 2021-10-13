@@ -29,8 +29,8 @@
 #include "dos_inc.h"
 #include "dos_system.h"
 
-const std::string_view get_extension(const std::string& name);
-const std::string_view get_filename(const std::string& name);
+std::string_view get_extension(const std::string& name);
+std::string_view get_filename(const std::string& name);
 
 bool WildFileCmp(const std::string &file, const std::string &wild);
 bool WildFileCmp(const char * file, const char * wild);

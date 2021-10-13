@@ -26,7 +26,7 @@
 #include <vector>
 
 
-const std::string_view get_extension(const std::string& name) {
+std::string_view get_extension(const std::string& name) {
     auto pos = name.find_last_of('.');
     if (pos == std::string::npos) {
         return std::string_view{""};
@@ -34,8 +34,8 @@ const std::string_view get_extension(const std::string& name) {
     return std::string_view{ &name.at(pos)+1 };
 }
 
-const std::string_view get_filename(const std::string& name) {
-    const std::string_view name_v{name};
+std::string_view get_filename(const std::string& name) {
+    std::string_view name_v{name};
     auto pos = name_v.find_last_of('.');
     if (pos == std::string::npos) {
         return name_v;
@@ -47,38 +47,51 @@ const std::string_view get_filename(const std::string& name) {
  * Compare a string with another string that optionally contains
  * wildcard characters asterisk and question mark.
  */
-bool wild_equals(const std::string_view &name, const std::string_view &wild) {
+bool wild_equals(const std::string_view &name, const std::string_view &wild, const std::string::size_type size) {
     // both blank, match
     if (name.empty() && wild.empty()) return true;
     // iterate on a character-by-character basis so we can only
     // pass over the strings once. otherwise we can use std::compare or
     // regexes if we don't care about performance here
-    for (std::string::size_type i = 0; i < wild.size(); i++) {
+    const auto wild_size = wild.size();
+    const auto name_size = name.size();
+    for (std::string::size_type i = 0; i < size; i++) {
+        auto w_chr = i < wild_size ? toupper(wild[i]) : ' ';
+        auto f_chr = i < name_size ? toupper(name[i]) : ' ';
         // break here and continue with check if we have a wildcard
-        if (wild[i] == '*') return true;
+        if (w_chr == '*') return true;
         // single char wildcard, don't bother comparing
-        if (wild[i] == '?') continue;
+        if (w_chr == '?') continue;
         // we have non-wildcard, compare
-        if (toupper(wild[i]) != toupper(name[i])) return false;
-        // make sure we don't try to compare past name length
-        if (i == name.size()) break;
+        if (w_chr != f_chr)  return false;
     }
     // if we're here, we don't have wildcards and we've passed all
     // matches up to wild length. final check makes sure that
     // the two strings are of equal length
-    return name.size() == wild.size();
+    return true;
 }
 
+/**
+ * Compare an 8.3 filename with another 8.3 filename, optionally
+ * containing wildcards * and ?.
+ * NOTE: This contains some oddities that exist within DOSBox, but not
+ * actual MSDOS:
+ *
+ *   - `*` will match `TEST` but not `TEST.EXE`, in MSDOS `*` functions
+ *     the same as `*.*` (e.g., `DIR *` in MSDOS 6.22)
+ *   - This function treats shorter than 8/3 strings space padded, but
+ *     MSDOS appears to treat missing as a wildcard? Check this!
+ */
 bool WildFileCmp(const std::string &file, const std::string &wild)
 {
-    const auto wild_ext = get_filename(wild);
-    const auto file_ext = get_filename(file);
+    const auto wild_name = get_filename(wild);
+    const auto file_name = get_filename(file);
 
-    const auto wild_name = get_extension(wild);
-    const auto file_name = get_extension(file);
-    
-    if (!wild_equals(file_name, wild_name)) return false;
-    if (!wild_equals(file_ext, wild_ext)) return false;
+    const auto wild_ext = get_extension(wild);
+    const auto file_ext = get_extension(file);
+
+    if (!wild_equals(file_name, wild_name, 8)) return false;
+    if (!wild_equals(file_ext, wild_ext, 3)) return false;
 
     return true;
 }
