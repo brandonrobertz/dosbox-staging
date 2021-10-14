@@ -126,7 +126,7 @@ TEST(WildFileCmpSTD, QuestionMark)
 
 TEST(Set_Label, Daggerfall)
 {
-    std::string input = "Daggerfall\0";
+    std::string input = "Daggerfall";
     char output[9] = { 0 };
     bool cdrom = false;
     std::cout << "CD-ROM? " << cdrom << " Input: " << input << " Output: " << output << '\n';
@@ -135,7 +135,7 @@ TEST(Set_Label, Daggerfall)
 }
 TEST(Set_Label, DaggerfallCD)
 {
-    std::string input = "Daggerfall\0";
+    std::string input = "Daggerfall";
     char output[9] = { 0 };
     bool cdrom = true;
     Set_Label(input.c_str(), output, cdrom);
@@ -145,7 +145,7 @@ TEST(Set_Label, DaggerfallCD)
 
 TEST(Set_Label, LongerThan11)
 {
-    std::string input = "a123456789AAA\0";
+    std::string input = "a123456789AAA";
     char output[9] = { 0 };
     bool cdrom = false;
     Set_Label(input.c_str(), output, cdrom);
@@ -154,7 +154,7 @@ TEST(Set_Label, LongerThan11)
 }
 TEST(Set_Label, LongerThan11CD)
 {
-    std::string input = "a123456789AAA\0";
+    std::string input = "a123456789AAA";
     char output[9] = { 0 };
     bool cdrom = true;
     Set_Label(input.c_str(), output, cdrom);
