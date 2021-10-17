@@ -179,6 +179,40 @@ std::string To_Label(const char* name) {
 	return label;
 }
 
+/**
+ * Take an input stream of chars and output an 8.3 MS-DOS
+ * label to output string buffer. This has some special handling
+ * for CD-ROMs (leaving case sentitivity, as opposed to the normal
+ * upcase of DOS labels).
+ *
+ * NOTE: This routine has a lot of strange behavior that I'm not even
+ * sure is valid or not. I think long term it would make sense to check
+ * against other DOS implementations and possible the actual MSCDEX
+ * driver functionality because I get the feeling I've reimplemented
+ * some unintentional bugs.
+ */
+void Set_Label(const std::string &input,std::string &output, bool cdrom) {
+    const auto dot_pos = input.find_first_of('.');
+    auto name_end = dot_pos < 8 ? dot_pos : 8;
+
+    output = input.substr(0, name_end);
+
+    if (input[name_end] == '.')
+        name_end++; // skip the dot
+
+    if (!cdrom && input.size() == 9 && input[8] == '.') {
+        // don't add a dot
+        // add trailing dot except when on cdrom and filename is exactly 8 (9 including the dot) letters. MSCDEX feature/bug (fifa96 cdrom detection)
+    } else if ((cdrom && input.size() >= 8) || input.size() > name_end) {
+        output += '.';
+    }
+
+    if (input.size() > name_end)
+        output += input.substr(name_end, 3);
+
+    if (!cdrom) upcase(output);
+}
+
 void Set_Label(char const * const input, char * const output, bool cdrom) {
 	Bitu togo     = 8;
 	Bitu vnamePos = 0;
