@@ -357,7 +357,7 @@ executable('dosbox', ['src/main.cpp', 'src/dosbox.cpp', version_file],
 # create a library so we can test things inside DOSBOX dep path
 libdosbox = static_library('dosbox', ['src/main.cpp', 'src/dosbox.cpp', version_file],
                         include_directories : incdir,
-                        dependencies : [atomic_dep, threads_dep, sdl2_dep] + internal_deps)
+                        dependencies : [atomic_dep, threads_dep, sdl2_dep, libloguru_dep] + internal_deps)
 dosbox_dep = declare_dependency(link_with : libdosbox)
 
 
